@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This project, TorchFold, is a PyTorch library designed to implement dynamic batching with a simple and intuitive interface. It serves as an analog to TensorFlow Fold, providing a mechanism to optimize computations by dynamically batching operations, which is particularly useful for handling variable-sized or recursive data structures like trees or graphs in neural networks.
+This project, TorchFold, is a PyTorch library designed to implement dynamic batching with a simple and intuitive interface. Inspired by TensorFlow Fold, it optimizes computations by dynamically batching operations, which is particularly useful for handling variable-sized or recursive data structures like trees or graphs in neural networks.
 
 ### Main Purpose and Problems Solved
 TorchFold addresses the challenge of efficiently processing data with irregular structures in deep learning models. Traditional batching methods often struggle with non-uniform data, leading to inefficient computation or wasted resources. TorchFold solves this by allowing developers to construct optimized computations that adapt to the data's structure at runtime, improving performance and resource utilization in PyTorch-based projects.
@@ -17,208 +17,242 @@ TorchFold is a powerful tool for researchers and developers working on natural l
 
 ## Getting Started, Installation, and Setup
 
-### Getting Started
+### Quick Start Guide
 
-**Quick Start Guide**
+To quickly get started with TorchFold, follow these steps:
 
-`torchfold` is a library for dynamic batching with PyTorch, designed to optimize computations by dynamically batching operations. Here's how to quickly use it in your project:
+1. Install TorchFold using pip:
+   ```bash
+   pip install torchfold
+   ```
+2. Use the dynamic batching functionality in your PyTorch project by integrating the `torchfold.Fold()` class. Here's a basic example of how to structure your code:
+   ```python
+   import torchfold
+   import torch.nn as nn
 
-1. **Basic Usage**: Replace direct calls to your neural network modules with `f.add('function_name', arguments)` to construct an optimized computation graph.
-2. **Apply Computation**: Use `f.apply(model, [inputs])` to execute the computation on your model with dynamic batching.
+   f = torchfold.Fold()
 
-Here's a simple example of how to use `torchfold` with a tree structure:
+   def dfs(node):
+       if is_leaf(node):
+           return f.add('leaf', node)
+       else:
+           prev = f.add('init')
+           for child in children(node):
+               prev = f.add('child', prev, child)
+           return prev
 
-```python
-    import torchfold
-    import torch.nn as nn
+   class Model(nn.Module):
+       def __init__(self, ...):
+           super(Model, self).__init__()
+           # Define your model components
 
-    # Initialize Fold
-    f = torchfold.Fold()
+       def leaf(self, leaf):
+           # Process leaf node
+           pass
 
-    def dfs(node):
-        if is_leaf(node):
-            return f.add('leaf', node)
-        else:
-            prev = f.add('init')
-            for child in children(node):
-                prev = f.add('child', prev, child)
-            return prev
+       def child(self, prev, child):
+           # Process child node
+           pass
 
-    class Model(nn.Module):
-        def __init__(self, ...):
-            # Initialize your model components
-            pass
+   # Construct computation graph
+   res = dfs(my_tree)
+   model = Model(...)
+   # Execute with dynamic batching
+   f.apply(model, [[res]])
+   ```
 
-        def leaf(self, leaf):
-            # Process leaf node
-            pass
+For a more detailed example, refer to the provided `examples/snli/spinn-example.py` script in the repository.
 
-        def child(self, prev, child):
-            # Process child node
-            pass
+### Installation Instructions
 
-    # Process a tree structure
-    res = dfs(my_tree)
-    model = Model(...)
-    # Execute with dynamic batching
-    result = f.apply(model, [[res]])
-```
-
-For a more detailed example, refer to the `examples/snli/spinn-example.py` file in the repository, which demonstrates usage in a tree-based neural network for natural language inference.
-
-### Installation and Setup
-
-#### Prerequisites
-- Python 3.x
-- PyTorch (version compatible with your system, typically the latest stable version is recommended)
-
-#### Installation
-
-To install `torchfold`, use pip for the easiest setup:
+TorchFold can be installed easily via pip, which will handle all necessary dependencies:
 
 ```bash
 pip install torchfold
 ```
 
-Alternatively, you can install from source by cloning the repository and running:
+Ensure you have PyTorch installed in your environment as TorchFold relies on it for functionality. If PyTorch is not installed, you can install it by following the instructions on the [PyTorch official website](https://pytorch.org/get-started/locally/).
 
-```bash
-python setup.py install
-```
+#### Platform-Specific Instructions
+- **Linux/macOS/Windows**: The pip installation should work across all major platforms without additional setup. Ensure your system has Python 3 and pip installed.
+- **CUDA Support**: If you plan to use GPU acceleration, make sure to install the CUDA version of PyTorch as per your CUDA version. The `spinn-example.py` script includes options to enable or disable CUDA (`--no-cuda` flag).
 
-#### Development Setup
+### Setup for Development
 
-If you plan to contribute or modify the library, follow these steps:
+If you want to contribute to TorchFold or run it from source:
 
 1. Clone the repository:
    ```bash
-git clone https://github.com/nearai/torchfold.git
-cd torchfold
+   git clone https://github.com/nearai/torchfold.git
+   cd torchfold
    ```
 2. Install in development mode:
    ```bash
-python setup.py develop
+   python setup.py develop
+   ```
+   This will link the local package to your Python environment, allowing changes to take effect without reinstalling.
+3. Verify the installation by running the example:
+   ```bash
+   python examples/snli/spinn-example.py
+   ```
+   Note that running the example requires additional dependencies like `torchtext`. Install them via pip if needed:
+   ```bash
+   pip install torchtext
    ```
 
-This setup allows you to make changes to the codebase and have them reflected immediately without reinstalling.
+### Building for Production
 
-#### Platform-Specific Instructions
+TorchFold is primarily a library to be used within other projects, so there is no specific production build process. After installation via pip, it can be imported and used in any Python script or application. If you're integrating TorchFold into a larger project, ensure all dependencies (like PyTorch) are specified in your project's requirements.
 
-- **Linux/MacOS/Windows**: The library is platform-independent and should work on any system with Python and PyTorch installed. Ensure your PyTorch installation matches your system's architecture (CPU/GPU support).
-- **CUDA Support**: If you have a GPU and want to leverage CUDA for faster computation, ensure that your PyTorch installation includes CUDA support. You can check this with `torch.cuda.is_available()` in Python. The `torchfold` library itself does not require additional CUDA setup beyond PyTorch.
+For deployment, consider containerizing your application using Docker to ensure consistency across environments. Include the `pip install torchfold` command in your Dockerfile or requirements file.
 
-#### Running Examples
+## Features / Capabilities
 
-To run the provided example (as seen in `examples/snli/spinn-example.py`), ensure you have additional dependencies installed:
+### Core Features
 
-```bash
-pip install torchtext
-```
+**TorchFold** is a library designed to enable dynamic batching in PyTorch, allowing for efficient processing of variable-sized inputs such as trees or graphs. Below are the primary features and capabilities of this project:
 
-Then, run the example with or without fold optimizations:
+- **Dynamic Batching**: TorchFold facilitates dynamic batching, which helps optimize computation by grouping operations of varying sizes into batches. This is particularly useful for neural network architectures dealing with recursive or hierarchical data structures.
+- **Fold and Unfold Classes**: The library provides two main classes:
+  - **`Fold`**: Used for batching operations dynamically. It allows operations to be grouped and computed in a batched manner, optimizing performance by reducing overhead from individual computations.
+  - **`Unfold`**: A debugging counterpart to `Fold`, which performs computations immediately without batching, useful for verifying correctness during development.
+- **Support for Complex Neural Architectures**: TorchFold can be integrated with neural network modules to handle complex operations, such as tree-structured data processing with models like TreeLSTM.
+- **CUDA Support**: The library supports GPU acceleration with CUDA, enabling faster computation on compatible hardware.
+- **Flexible Node Operations**: It provides mechanisms to split results from operations (for functions returning multiple values) and control batching behavior with options like `nobatch()`.
 
-```bash
-python examples/snli/spinn-example.py --fold
-```
+### Example Use Case
 
-Use `--no-cuda` flag if you do not have CUDA support or prefer CPU computation:
+An example implementation is provided for the **SPINN (Stack-augmented Parser-Interpreter Neural Network)** model, demonstrating how TorchFold can be used for natural language inference tasks with tree-structured data:
 
-```bash
-python examples/snli/spinn-example.py --fold --no-cuda
-```
+- **SNLI Example**: Located in `examples/snli/spinn-example.py`, this script showcases the use of TorchFold to encode tree structures for the Stanford Natural Language Inference (SNLI) dataset. It compares regular tree encoding with folded (batched) encoding, highlighting performance improvements through dynamic batching.
 
-#### Production Build
+This library is particularly suited for researchers and developers working on machine learning models that require efficient handling of non-uniform data structures.
 
-Since `torchfold` is a library, there is no specific production build process. Ensure that your application using `torchfold` is optimized for production by:
-- Using the latest stable version of PyTorch.
-- Testing your model with dynamic batching on representative datasets to ensure performance.
-- Packaging your application with dependencies pinned to specific versions for reproducibility.
+## Usage Examples
+
+### Basic Usage with SPINN Example
+
+The repository includes an example implementation of a Stack-augmented Parser-Interpreter Neural Network (SPINN) for natural language inference using the SNLI dataset. This example demonstrates how to use `torchfold` for dynamic batching in PyTorch. Below are the steps to run the example:
+
+1. **Ensure Dependencies are Installed**: Make sure you have PyTorch, torchtext, and other required libraries installed. You can install `torchfold` directly from this repository using `pip install .` from the root directory.
+
+2. **Navigate to the Examples Directory**: The SPINN example is located in the `examples/snli/` folder.
+   
+   ```bash
+   cd examples/snli
+   ```
+
+3. **Run the SPINN Example**: Execute the `spinn-example.py` script to train the model on the SNLI dataset. You can choose to enable dynamic batching with the `--fold` flag.
+   
+   - Run without dynamic batching:
+     ```bash
+     python spinn-example.py
+     ```
+   
+   - Run with dynamic batching using `torchfold`:
+     ```bash
+     python spinn-example.py --fold
+     ```
+
+4. **Adjust Batch Size (Optional)**: You can modify the batch size using the `--batch_size` argument. For example, to set a batch size of 64:
+   
+   ```bash
+   python spinn-example.py --fold --batch_size 64
+   ```
+
+5. **Disable CUDA (Optional)**: If you do not have a CUDA-enabled GPU or prefer to run on CPU, use the `--no-cuda` flag:
+   
+   ```bash
+   python spinn-example.py --fold --no-cuda
+   ```
+
+### Understanding the Output
+
+While running the script, the program will output the average time taken per iteration every 10 iterations. This can help you monitor the training performance, especially to compare the efficiency of dynamic batching with `torchfold` versus regular processing.
+
+### Notes
+
+- The provided `spinn-example.py` is a demonstration and not a full implementation of the SPINN model.
+- Ensure you have the SNLI dataset accessible through `torchtext.datasets.SNLI` as the script downloads and processes it automatically during execution.
 
 ## Project Structure
 
-The project is organized into a clear and concise structure, with directories and files serving specific purposes. Below is an overview of the key components of the repository:
+This section outlines the layout of the project, highlighting the purpose of key directories and files.
 
-#### Key Directories and Files
+### Directory and File Overview
 
-- **`torchfold/`**: The core module directory containing the primary implementation of the dynamic batching functionality for PyTorch.
-  - **`__init__.py`**: Initializes the `torchfold` module, exporting the `Fold` and `Unfold` classes.
-  - **`torchfold.py`**: Contains the main logic for dynamic batching, including the `Fold` class for optimized computation and the `Unfold` class for debugging purposes.
-  - **`torchfold_test.py`**: Includes unit tests for the `torchfold` module, covering functionality like RNN batching and node operations.
+- **Root Directory**: Contains essential project files such as:
+  - `.gitignore`: Specifies intentionally untracked files to ignore.
+  - `LICENSE`: Contains the licensing information for the project.
+  - `README.md`: The main documentation file for the project.
+  - `README_Prometheus.md`: Additional documentation, possibly specific to Prometheus integration or context.
+  - `logo.jpg`: A logo image associated with the project.
+  - `setup.py`: A setup script for installing the project as a Python package.
 
-- **`examples/`**: Contains example implementations demonstrating the usage of `torchfold`.
-  - **`snli/spinn-example.py`**: Provides an example of using `torchfold` with a SPINN (Stack-augmented Parser-Interpreter Neural Network) model for natural language inference tasks.
+- **examples/**: A directory for example scripts or usage demonstrations.
+  - `examples/snli/spinn-example.py`: Likely an example script related to the SNLI dataset or SPINN model, demonstrating how to use the project's functionality.
 
-- **`setup.py`**: Configuration file for installing the `torchfold` package using setuptools. It defines metadata like version, description, and dependencies.
-
-- **`.gitignore`**: Specifies files and directories to be ignored by Git, such as build artifacts and temporary files.
-
-- **`LICENSE`**: Contains the licensing information for the project (Apache License, Version 2.0).
-
-- **`logo.jpg`**: A logo image associated with the project, used in documentation.
-
-- **`README.md`**: The main documentation file providing an overview, installation instructions, and usage examples for the project.
-
-This structure ensures that the core functionality, testing, and examples are well-organized and accessible for developers looking to use or contribute to the `torchfold` library.
+- **torchfold/**: The core package directory, containing the main codebase.
+  - `torchfold/__init__.py`: Marks this directory as a Python package.
+  - `torchfold/torchfold.py`: The primary source code file for the TorchFold library, likely containing the main implementation.
+  - `torchfold/torchfold_test.py`: Contains test cases for the TorchFold library to ensure functionality and correctness.
 
 ## Technologies Used
 
-This project leverages the following major technologies, frameworks, and tools:
+This project leverages the following major technologies, frameworks, and libraries:
 
-- **PyTorch**: A deep learning framework used for tensor computation and dynamic neural networks. TorchFold is built specifically to work with PyTorch for dynamic batching.
-- **Python**: The primary programming language used for the implementation of this library.
-- **setuptools**: Utilized for packaging and distributing the TorchFold library, as seen in the setup.py configuration.
+- **PyTorch**: An open-source machine learning library for Python, used for dynamic batching and neural network operations in this project. TorchFold is built on top of PyTorch to facilitate dynamic computation graphs.
 
-These technologies form the core foundation of the TorchFold project, enabling dynamic batching capabilities for PyTorch-based applications.
+No other significant frameworks, SDKs, or tools were identified in the current codebase.
 
 ## Additional Notes
 
 ### Performance Considerations
 
-When using `torchfold` for dynamic batching in PyTorch, keep in mind that the efficiency of batching operations depends heavily on the structure of your data and the operations being performed. The `Fold` class is designed to optimize computation by grouping operations into batches dynamically. However, for very small batch sizes or highly irregular data structures, the overhead of managing the fold graph might outweigh the benefits of batching. In such cases, consider using the `Unfold` class for debugging or simpler computation without batching.
+When using `torchfold` for dynamic batching in PyTorch, be aware that the efficiency of batching operations largely depends on the structure of your data and the nature of the operations being performed. The `Fold` class is optimized to group operations into batches dynamically, which can significantly improve performance for recursive or variable-sized data structures like trees or graphs. However, for very small batch sizes or highly irregular data, the overhead of managing the computation graph might outweigh the benefits of batching. In such scenarios, consider benchmarking both with and without dynamic batching to determine the best approach for your use case.
 
 ### Debugging with Unfold
 
-The library provides an `Unfold` class as an alternative to `Fold`, primarily for debugging purposes. Unlike `Fold`, which batches operations for efficiency, `Unfold` performs computations immediately. This can be useful for tracing through the computation graph step-by-step to identify issues in your model or data processing pipeline. To switch to `Unfold`, initialize it with your neural network module and use it in place of `Fold`.
+The `torchfold` library includes an `Unfold` class as an alternative to `Fold`, which is particularly useful for debugging. Unlike `Fold`, which batches operations for efficiency, `Unfold` executes computations immediately without batching. This allows you to step through the computation graph to identify issues in your model or data processing pipeline. To use it, simply initialize `Unfold` with your neural network module and replace `Fold` in your code for debugging purposes.
 
 ### CUDA Support
 
-`torchfold` supports CUDA for GPU acceleration. To enable CUDA, call the `.cuda()` method on your `Fold` or `Unfold` instance before adding operations. Ensure that your PyTorch installation is configured for CUDA and that your model and data are also moved to the GPU if necessary.
+`torchfold` supports GPU acceleration via CUDA, provided your PyTorch installation is configured for it. To enable CUDA, call the `.cuda()` method on your `Fold` or `Unfold` instance before adding operations. Ensure that your model and input data are also moved to the GPU if necessary. This can significantly speed up computations for large datasets or complex models.
 
 ### Limitations
 
-- **Argument Types**: All arguments passed to the `add` method in `Fold` must be of type `Tensor`, `Variable`, `int`, or a `Fold.Node`. Mixing incompatible types will result in a `ValueError`.
-- **Batch Consistency**: When using `nobatch()` on a node, ensure that only one such node is used per operation to avoid errors.
-- **Dynamic Nature**: The dynamic batching approach may lead to varying memory usage during runtime, which could be a concern for resource-constrained environments.
+- **Argument Types**: All arguments passed to the `add` method in `Fold` must be of type `Tensor`, `Variable`, `int`, or a `Fold.Node`. Passing incompatible types will result in a `ValueError`.
+- **Batch Consistency**: When using `nobatch()` on a node, ensure that only one such node is used per operation to avoid runtime errors.
+- **Dynamic Memory Usage**: The dynamic nature of batching may lead to fluctuating memory usage during runtime, which could be a concern in resource-constrained environments. Monitor memory usage during development to avoid unexpected issues.
 
 ### Community and Support
 
-For further details on implementation or to discuss use cases, refer to the blog post linked in the project setup or visit the source repository on GitHub. Contributions, bug reports, and feature requests are welcome as per the contributing guidelines (see the relevant section of this README).
+For more in-depth information on implementation details or to discuss specific use cases, refer to the blog post linked in the original project documentation or visit the repository on GitHub. The community welcomes bug reports, feature requests, and contributions. Feel free to open issues or submit pull requests as outlined in the contributing guidelines.
 
 ### Example Usage
 
-An example script is available in the `examples/snli/` directory, demonstrating the application of `torchfold` in a natural language inference task using the SNLI dataset. This can serve as a starting point for understanding how to integrate dynamic batching into your own projects.
+A practical example is provided in the `examples/snli/` directory, showcasing `torchfold` in a natural language inference task using a SPINN (Stack-augmented Parser-Interpreter Neural Network) model. This example can serve as a starting point for integrating dynamic batching into your own projects, especially if you're working with tree-structured data or recursive neural networks.
 
 ## Contributing
 
-We welcome contributions from the community to help improve TorchFold. Whether it's bug fixes, feature enhancements, or documentation updates, your input is valuable to us.
+We welcome contributions from the community to help improve TorchFold. Whether you’re fixing bugs, adding new features, or improving documentation, your efforts are appreciated.
 
 ### How to Contribute
-1. **Fork the Repository**: Start by forking the repository to your own GitHub account.
-2. **Clone the Repository**: Clone the forked repository to your local machine for development.
-3. **Make Changes**: Implement your changes or additions in your local copy. Ensure your code aligns with the project's purpose and functionality.
-4. **Test Your Changes**: Before submitting, test your changes to ensure they work as expected and do not introduce new issues.
-5. **Commit Your Changes**: Commit your changes with clear, descriptive commit messages.
-6. **Push to Your Fork**: Push your changes to your forked repository on GitHub.
-7. **Submit a Pull Request**: Create a pull request from your fork to the main repository. Provide a detailed description of your changes and the motivation behind them.
+1. **Fork the Repository**: Start by forking the repository and cloning it to your local machine.
+2. **Make Changes**: Implement your changes or additions in your forked repository. Ensure your code adheres to the existing style and structure.
+3. **Test Your Changes**: Make sure to test your modifications. If you're adding new functionality, include appropriate test cases. You can refer to the existing test file `torchfold_test.py` for guidance on how tests are structured.
+4. **Commit Your Changes**: Write clear, concise commit messages that describe the purpose of your changes.
+5. **Push to Your Fork**: Push your changes to your forked repository.
+6. **Submit a Pull Request**: Create a pull request from your fork to the main repository. Provide a detailed description of your changes and the motivation behind them.
 
 ### Contribution Guidelines
-- **Code Style**: Please follow a consistent coding style. If you're unsure, refer to the existing codebase for guidance or adopt widely accepted Python style guidelines like PEP 8.
-- **Testing**: Ensure that your contributions include appropriate tests if applicable. This helps maintain the stability of the project. If you're adding new functionality, consider adding test cases in a similar style to existing tests.
-- **Documentation**: Update or add documentation for any new features or changes to existing functionality. Clear documentation helps other users understand and utilize the updates.
+- **Code Style**: Follow the coding style used in the existing codebase. Ensure your code is clean, well-documented, and follows Python best practices (e.g., PEP 8).
+- **Testing**: All contributions should include or update tests to cover the new or modified functionality. Tests should pass before submitting a pull request.
+- **Documentation**: If your contribution adds or modifies functionality, update any relevant documentation to reflect these changes.
 - **Issue Tracking**: If your contribution addresses a specific issue, reference the issue number in your pull request description.
 
-We review all contributions and may request changes or provide feedback before merging. Thank you for taking the time to contribute to TorchFold!
+Thank you for contributing to TorchFold and helping make it better!
 
 ## License
 
-This project is licensed under the Apache License, Version 2.0. You can view the full license text in the [LICENSE](./LICENSE) file.
+This project is licensed under the Apache License Version 2.0. You can view the full license terms and conditions in the [LICENSE](./LICENSE) file.
